@@ -1,29 +1,97 @@
-# Create T3 App
+# ⚜️ Avisala Restaurant
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+An Encantadia-themed full-service dining web application built on the **T3 Stack** (Next.js 15 App Router, TypeScript, tRPC v11, Prisma, SQLite, and Tailwind CSS v4) with **shadcn/ui** and optimistic updates.
 
-## What's next? How do I make an app with this?
+---
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## 📋 Prerequisites
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+Ensure you have the following installed on your machine:
+- **Node.js**: v18.18+ or v20+
+- **pnpm**: v9+ or v10+ (`npm install -g pnpm`)
+- **Git**
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+---
 
-## Learn More
+## 🚀 Setup & Installation (Step-by-Step)
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd restaurant-app
+```
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+### 2. Install Dependencies
+```bash
+pnpm install
+```
+> *Note: This automatically triggers `prisma generate` via the `postinstall` script to generate `@prisma/client`.*
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### 3. Configure Environment Variables
+Create your `.env` file from `.env.example`:
 
-## How do I deploy this?
+**Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
+```
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+**macOS / Linux:**
+```bash
+cp .env.example .env
+```
+
+Ensure `.env` contains:
+```env
+DATABASE_URL="file:./db.sqlite"
+NODE_ENV="development"
+```
+
+### 4. Initialize & Seed the SQLite Database
+Push the Prisma schema to create the local SQLite database and populate it with Encantadian kingdom menus, pantry ingredients, dining tables, and staff rosters:
+
+```bash
+# Push schema to create prisma/db.sqlite
+pnpm db:push
+
+# Seed kingdom dishes, tables, staff, and initial orders
+pnpm db:seed
+```
+
+### 5. Start the Development Server
+```bash
+pnpm dev
+```
+
+Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+---
+
+## 🧭 Application Routes
+
+### Customer Portal
+- **`/`**: Hero landing page & realm showcases.
+- **`/menu`**: Elemental menu with kingdom tabs (Lireo, Hathoria, Sapiro, Adamya), spice ratings (Lv. 0–4), dietary filters, and add-to-bag modal.
+- **`/reserve`**: Table reservation booking with realm selection, party size, calendar picker, and instant digital boarding pass.
+- **`/orders/[id]`**: Real-time order fulfillment stepper (`PENDING` ➔ `PREPARING` ➔ `READY` ➔ `FULFILLED`) polling live kitchen status.
+
+### Operations Backoffice Portal
+- **`/admin`**: Operations KPI dashboard with active metrics and quick-launch links.
+- **`/admin/kds`**: Kitchen Display System (KDS) 4-stage Kanban with elapsed timers and optimistic 1-click status advancement.
+- **`/admin/tables`**: Dining table floorplan grid with real-time occupancy toggling (`AVAILABLE`, `OCCUPIED`, `RESERVED`) and guest seating.
+- **`/admin/inventory`**: Real-time ingredient pantry monitor with low-stock warnings, restock logging, and automatic dish availability sync.
+- **`/admin/staff`**: 7-day brigade shift schedule across 4 operational stations with conflict detection.
+
+---
+
+## 🛠️ Handy Commands
+
+| Command | Description |
+| :--- | :--- |
+| `pnpm dev` | Starts Turbopack development server at `http://localhost:3000` |
+| `pnpm check` | Runs full strict linting (`next lint`) and type check (`tsc --noEmit`) |
+| `pnpm db:studio` | Opens Prisma Studio visual database GUI in browser |
+| `pnpm db:push` | Syncs Prisma schema directly to SQLite database |
+| `pnpm db:seed` | Re-seeds database with demo data |
+| `pnpm format:write` | Formats all files using Prettier |
+| `pnpm build` | Builds optimized production bundle |
+| `pnpm start` | Runs production server |
