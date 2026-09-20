@@ -42,15 +42,63 @@ export default function AdminStaffPage() {
   const [station, setStation] = useState("Kitchen Hearth");
 
   const createShiftMutation = api.staff.createShift.useMutation({
-    onSuccess: () => {
+    async onMutate(variables) {
+      await utils.staff.getShifts.cancel();
+      const previousShifts = utils.staff.getShifts.getData();
+      const staffMember = staffList?.find(
+        (m: StaffMember) => m.id === variables.staffId,
+      );
+
+      if (staffMember) {
+        const optimisticShift: ShiftItem = {
+          id: `temp-${Date.now()}`,
+          staffId: variables.staffId,
+          dayOfWeek: variables.dayOfWeek,
+          startTime: variables.startTime,
+          endTime: variables.endTime,
+          station: variables.station,
+          staff: staffMember,
+        };
+
+        utils.staff.getShifts.setData(undefined, (old) => {
+          if (!old) return [optimisticShift];
+          return [...old, optimisticShift];
+        });
+      }
+
+      setIsAddShiftOpen(false);
+
+      return { previousShifts };
+    },
+    onError(err, variables, context) {
+      if (context?.previousShifts) {
+        utils.staff.getShifts.setData(undefined, context.previousShifts);
+      }
+    },
+    onSettled() {
       void utils.staff.getShifts.invalidate();
       void utils.staff.getAll.invalidate();
-      setIsAddShiftOpen(false);
     },
   });
 
   const deleteShiftMutation = api.staff.deleteShift.useMutation({
-    onSuccess: () => {
+    async onMutate(variables) {
+      await utils.staff.getShifts.cancel();
+      const previousShifts = utils.staff.getShifts.getData();
+
+      utils.staff.getShifts.setData(undefined, (old) => {
+        if (!old) return old;
+        return old.filter((s: ShiftItem) => s.id !== variables.id);
+      });
+
+      return { previousShifts };
+    },
+    onError(err, variables, context) {
+      if (context?.previousShifts) {
+        utils.staff.getShifts.setData(undefined, context.previousShifts);
+      }
+    },
+    onSettled() {
       void utils.staff.getShifts.invalidate();
       void utils.staff.getAll.invalidate();
     },

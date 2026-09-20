@@ -25,7 +25,27 @@ export default function KDSPage() {
   });
 
   const updateStatusMutation = api.order.updateStatus.useMutation({
-    onSuccess: () => {
+    async onMutate(variables) {
+      await utils.order.getAll.cancel();
+      const previousOrders = utils.order.getAll.getData();
+
+      utils.order.getAll.setData(undefined, (old) => {
+        if (!old) return old;
+        return old.map((order: OrderSummary) =>
+          order.id === variables.orderId
+            ? { ...order, status: variables.status }
+            : order,
+        );
+      });
+
+      return { previousOrders };
+    },
+    onError(err, variables, context) {
+      if (context?.previousOrders) {
+        utils.order.getAll.setData(undefined, context.previousOrders);
+      }
+    },
+    onSettled() {
       void utils.order.getAll.invalidate();
     },
   });

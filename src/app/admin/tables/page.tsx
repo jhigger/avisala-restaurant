@@ -16,13 +16,87 @@ export default function AdminTablesPage() {
   const { data: reservations } = api.reserve.getReservations.useQuery();
 
   const updateTableStatusMutation = api.reserve.updateTableStatus.useMutation({
-    onSuccess: () => {
+    async onMutate(variables) {
+      await utils.reserve.getTables.cancel();
+      const previousTables = utils.reserve.getTables.getData();
+
+      utils.reserve.getTables.setData(undefined, (old) => {
+        if (!old) return old;
+        return old.map((table: DiningTableDetail) =>
+          table.id === variables.tableId
+            ? { ...table, status: variables.status }
+            : table,
+        );
+      });
+
+      return { previousTables };
+    },
+    onError(err, variables, context) {
+      if (context?.previousTables) {
+        utils.reserve.getTables.setData(undefined, context.previousTables);
+      }
+    },
+    onSettled() {
       void utils.reserve.getTables.invalidate();
     },
   });
 
   const updateReservationStatusMutation = api.reserve.updateStatus.useMutation({
-    onSuccess: () => {
+    async onMutate(variables) {
+      await utils.reserve.getReservations.cancel();
+      await utils.reserve.getTables.cancel();
+      const previousReservations = utils.reserve.getReservations.getData();
+      const previousTables = utils.reserve.getTables.getData();
+
+      // Find the reservation being updated
+      const targetRes = previousReservations?.find(
+        (r: ReservationDetail) => r.id === variables.reservationId,
+      );
+
+      // Optimistically update reservation
+      utils.reserve.getReservations.setData(undefined, (old) => {
+        if (!old) return old;
+        return old.map((res: ReservationDetail) =>
+          res.id === variables.reservationId
+            ? { ...res, status: variables.status }
+            : res,
+        );
+      });
+
+      // If seating a reservation with an assigned table, optimistically mark table OCCUPIED
+      if (targetRes?.tableId) {
+        const tableId = targetRes.tableId;
+        utils.reserve.getTables.setData(undefined, (old) => {
+          if (!old) return old;
+          return old.map((table: DiningTableDetail) => {
+            if (table.id === tableId) {
+              if (variables.status === "SEATED")
+                return { ...table, status: "OCCUPIED" };
+              if (
+                variables.status === "COMPLETED" ||
+                variables.status === "CANCELLED"
+              )
+                return { ...table, status: "AVAILABLE" };
+            }
+            return table;
+          });
+        });
+      }
+
+      return { previousReservations, previousTables };
+    },
+    onError(err, variables, context) {
+      if (context?.previousReservations) {
+        utils.reserve.getReservations.setData(
+          undefined,
+          context.previousReservations,
+        );
+      }
+      if (context?.previousTables) {
+        utils.reserve.getTables.setData(undefined, context.previousTables);
+      }
+    },
+    onSettled() {
       void utils.reserve.getReservations.invalidate();
       void utils.reserve.getTables.invalidate();
     },

@@ -39,16 +39,64 @@ export default function AdminInventoryPage() {
   const [costPerUnit, setCostPerUnit] = useState<number | undefined>(undefined);
 
   const replenishMutation = api.inventory.replenish.useMutation({
-    onSuccess: () => {
-      void utils.inventory.getAll.invalidate();
-      void utils.menu.getAll.invalidate();
+    async onMutate(variables) {
+      await utils.inventory.getAll.cancel();
+      const previousIngredients = utils.inventory.getAll.getData();
+
+      utils.inventory.getAll.setData(undefined, (old) => {
+        if (!old) return old;
+        return old.map((ing: IngredientDetail) => {
+          if (ing.id === variables.ingredientId) {
+            const newStock = ing.currentStock + variables.addedStock;
+            return {
+              ...ing,
+              currentStock: newStock,
+              isLowStock: newStock <= ing.lowStockThreshold,
+              costPerUnit: variables.costPerUnit ?? ing.costPerUnit,
+            };
+          }
+          return ing;
+        });
+      });
+
       setReplenishTarget(null);
       setCostPerUnit(undefined);
+
+      return { previousIngredients };
+    },
+    onError(err, variables, context) {
+      if (context?.previousIngredients) {
+        utils.inventory.getAll.setData(undefined, context.previousIngredients);
+      }
+    },
+    onSettled() {
+      void utils.inventory.getAll.invalidate();
+      void utils.menu.getAll.invalidate();
     },
   });
 
   const toggleMenuItemMutation = api.menu.toggleAvailability.useMutation({
-    onSuccess: () => {
+    async onMutate(variables) {
+      await utils.menu.getAll.cancel();
+      const previousMenu = utils.menu.getAll.getData();
+
+      utils.menu.getAll.setData(undefined, (old) => {
+        if (!old) return old;
+        return old.map((dish: MenuItemDetail) =>
+          dish.id === variables.id
+            ? { ...dish, isAvailable: variables.isAvailable }
+            : dish,
+        );
+      });
+
+      return { previousMenu };
+    },
+    onError(err, variables, context) {
+      if (context?.previousMenu) {
+        utils.menu.getAll.setData(undefined, context.previousMenu);
+      }
+    },
+    onSettled() {
       void utils.menu.getAll.invalidate();
     },
   });

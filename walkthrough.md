@@ -29,14 +29,32 @@
 
 ### D. Operational Backoffice & KDS
 - **Kitchen Display System (KDS)** at `/admin/kds`:
-  - 3-column Kanban board (`Pending`, `Preparing`, `Ready to Serve`).
+  - 4-column Kanban board (`Pending`, `Preparing`, `Ready`, `Fulfilled`).
   - Elapsed order timers, itemized ingredient breakdowns, and 1-click status advancement.
 - **Host Seating & Table Desk** at `/admin/tables`:
-  - Floorplan view categorized by kingdom, live table occupancy statuses (`AVAILABLE`, `OCCUPIED`, `RESERVED`, `CLEANING`), and quick-seat action.
+  - Floorplan view categorized by kingdom, live table occupancy statuses (`AVAILABLE`, `OCCUPIED`, `RESERVED`), and quick-seat action.
 - **Pantry Inventory Monitor** at `/admin/inventory`:
   - Real-time stock levels, low-stock visual warning badges, and instant restock action with automatic reactivation of depleted menu dishes.
 - **Staff Roster & Weekly Shift Scheduler** at `/admin/staff`:
-  - 7-day schedule grid across Morning, Afternoon, and Evening shifts.
+  - 7-day schedule grid across 4 stations (Kitchen Hearth, Elixir Bar, Dining Floor, Delivery Wing).
+
+---
+
+## 2. Optimistic UI Updates (Zero Latency Experience)
+
+We implemented TanStack Query / tRPC optimistic mutations across all interactive operational interfaces:
+
+1. **Kitchen Display System (`/admin/kds`)**:
+   - `updateStatusMutation`: Instantly moves the order card across the Kanban columns on click (`PENDING` ➔ `PREPARING` ➔ `READY` ➔ `FULFILLED`) using `utils.order.getAll.setData`. Rolls back if network fails.
+2. **Floorplan & Table Management (`/admin/tables`)**:
+   - `updateTableStatusMutation`: Immediately changes table badge and styling (`AVAILABLE` ➔ `OCCUPIED` ➔ `RESERVED`) in `utils.reserve.getTables.setData`.
+   - `updateReservationStatusMutation`: Instantly updates guest reservation (`CONFIRMED` ➔ `SEATED` ➔ `COMPLETED`) and automatically updates the assigned table status to `OCCUPIED` in the floorplan without waiting for server roundtrips.
+3. **Pantry Inventory & Menu Controls (`/admin/inventory`)**:
+   - `toggleMenuItemMutation`: Instantly flips dish availability badge (`Available` ⟷ `Sold Out`) in `utils.menu.getAll.setData`.
+   - `replenishMutation`: Immediately increments ingredient stock level and updates low-stock warnings in `utils.inventory.getAll.setData`.
+4. **Staff Shift Roster (`/admin/staff`)**:
+   - `deleteShiftMutation`: Instantly removes deleted shifts from the weekly schedule in `utils.staff.getShifts.setData`.
+   - `createShiftMutation`: Optimistically appends the newly scheduled shift to the targeted day and station in `utils.staff.getShifts.setData`.
 
 ---
 
