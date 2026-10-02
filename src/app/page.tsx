@@ -283,7 +283,7 @@ export default function HomePage() {
                 </div>
                 <div className="absolute right-3 bottom-3">
                   <span className="bg-card/90 border-border rounded-lg border px-2.5 py-1 text-xs font-extrabold text-amber-600 shadow-xs backdrop-blur-md dark:text-amber-400">
-                    ₱{item.price.toFixed(2)}
+                    ₱{Number(item.price).toFixed(2)}
                   </span>
                 </div>
               </div>

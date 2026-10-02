@@ -295,7 +295,7 @@ export default function AdminInventoryPage() {
                 <div>
                   <p className="text-foreground font-bold">{dish.name}</p>
                   <p className="text-muted-foreground text-[10px]">
-                    {dish.kingdom} • ₱{dish.price.toFixed(2)} •{" "}
+                    {dish.kingdom} • ₱{Number(dish.price).toFixed(2)} •{" "}
                     {dish.recipe.length} recipe ingredients
                   </p>
                 </div>

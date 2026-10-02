@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <p className="text-muted-foreground mt-0.5 text-[11px]">
                     {order.customerName} • {order.items.length} dishes • ₱
-                    {order.totalAmount.toFixed(2)}
+                    {Number(order.totalAmount).toFixed(2)}
                   </p>
                 </div>
 

@@ -360,7 +360,7 @@ export default function KDSPage() {
                   {order.customerName}
                 </p>
                 <p className="font-bold text-amber-600">
-                  ₱{order.totalAmount.toFixed(2)}
+                  ₱{Number(order.totalAmount).toFixed(2)}
                 </p>
               </div>
             ))}

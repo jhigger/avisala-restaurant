@@ -329,7 +329,7 @@ function MenuContent() {
 
                 <div className="absolute right-2.5 bottom-2.5">
                   <span className="bg-card/90 border-border rounded-md border px-2 py-0.5 text-xs font-extrabold text-amber-600 shadow-xs backdrop-blur-md dark:text-amber-400">
-                    ₱{item.price.toFixed(2)}
+                    ₱{Number(item.price).toFixed(2)}
                   </span>
                 </div>
               </div>
