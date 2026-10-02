@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { Prisma, OrderStatus, OrderType, PaymentMethod } from "@prisma/client";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const orderItemInputSchema = z.object({
@@ -28,11 +28,11 @@ export const orderRouter = createTRPCRouter({
         customerName: z.string().min(1, "Name is required"),
         customerPhone: z.string().min(5, "Phone number is required"),
         customerEmail: z.string().email().optional().or(z.literal("")),
-        orderType: z.enum(["DELIVERY", "PICKUP"]),
+        orderType: z.nativeEnum(OrderType),
         deliveryAddress: z.string().optional(),
         pickupTime: z.string().optional(),
         specialInstructions: z.string().optional(),
-        paymentMethod: z.enum(["GCASH", "MAYA", "CARD", "GOLD"]),
+        paymentMethod: z.nativeEnum(PaymentMethod),
         items: z
           .array(orderItemInputSchema)
           .min(1, "At least one item is required"),
@@ -70,16 +70,16 @@ export const orderRouter = createTRPCRouter({
         }
       }
 
-      // 3. Compute totals
-      let subtotal = 0;
+      // 3. Compute totals using exact Decimal arithmetic
+      let subtotal = new Prisma.Decimal(0);
       for (const reqItem of input.items) {
         const item: MenuItemWithRecipe = itemMap.get(reqItem.menuItemId)!;
-        subtotal += item.price * reqItem.quantity;
+        subtotal = subtotal.add(item.price.mul(reqItem.quantity));
       }
 
-      const tax = Math.round(subtotal * 0.12 * 100) / 100;
-      const deliveryFee = input.orderType === "DELIVERY" ? 120 : 0;
-      const totalAmount = subtotal + tax + deliveryFee;
+      const tax = subtotal.mul(0.12).toDecimalPlaces(2);
+      const deliveryFee = new Prisma.Decimal(input.orderType === "DELIVERY" ? 120 : 0);
+      const totalAmount = subtotal.add(tax).add(deliveryFee);
 
       // 4. Generate Order Number
       const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -194,7 +194,9 @@ export const orderRouter = createTRPCRouter({
     .input(
       z
         .object({
-          status: z.string().optional(),
+          status: z
+            .union([z.nativeEnum(OrderStatus), z.literal("ALL")])
+            .optional(),
           limit: z.number().optional(),
         })
         .optional(),
@@ -223,13 +225,7 @@ export const orderRouter = createTRPCRouter({
     .input(
       z.object({
         orderId: z.string(),
-        status: z.enum([
-          "PENDING",
-          "PREPARING",
-          "READY",
-          "FULFILLED",
-          "CANCELLED",
-        ]),
+        status: z.nativeEnum(OrderStatus),
       }),
     )
     .mutation(async ({ ctx, input }) => {

@@ -1,5 +1,10 @@
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import {
+  ReservationStatus,
+  Realm,
+  TableStatus,
+  type Prisma,
+} from "@prisma/client";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const reserveRouter = createTRPCRouter({
@@ -13,7 +18,9 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z
         .object({
-          status: z.string().optional(),
+          status: z
+            .union([z.nativeEnum(ReservationStatus), z.literal("ALL")])
+            .optional(),
           date: z.string().optional(),
         })
         .optional(),
@@ -50,12 +57,7 @@ export const reserveRouter = createTRPCRouter({
         reservationDate: z.string(), // ISO date string
         timeSlot: z.string().min(1, "Time slot required"),
         partySize: z.number().int().min(1).max(20),
-        realmPreference: z.enum([
-          "LIREO_TERRACE",
-          "HATHORIAN_HEARTH",
-          "SAPIRO_HALL",
-          "ADAMYA_LAGOON",
-        ]),
+        realmPreference: z.nativeEnum(Realm),
         specialRequests: z.string().optional(),
       }),
     )
@@ -133,7 +135,7 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z.object({
         reservationId: z.string(),
-        status: z.enum(["CONFIRMED", "SEATED", "COMPLETED", "CANCELLED"]),
+        status: z.nativeEnum(ReservationStatus),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -174,7 +176,7 @@ export const reserveRouter = createTRPCRouter({
     .input(
       z.object({
         tableId: z.string(),
-        status: z.enum(["AVAILABLE", "OCCUPIED", "RESERVED"]),
+        status: z.nativeEnum(TableStatus),
       }),
     )
     .mutation(async ({ ctx, input }) => {

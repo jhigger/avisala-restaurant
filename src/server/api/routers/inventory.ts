@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const inventoryRouter = createTRPCRouter({
@@ -38,7 +39,7 @@ export const inventoryRouter = createTRPCRouter({
               increment: input.addedStock,
             },
             ...(input.costPerUnit !== undefined
-              ? { costPerUnit: input.costPerUnit }
+              ? { costPerUnit: new Prisma.Decimal(input.costPerUnit) }
               : {}),
           },
         });
@@ -100,7 +101,7 @@ export const inventoryRouter = createTRPCRouter({
         data: {
           lowStockThreshold: input.lowStockThreshold,
           ...(input.costPerUnit !== undefined
-            ? { costPerUnit: input.costPerUnit }
+            ? { costPerUnit: new Prisma.Decimal(input.costPerUnit) }
             : {}),
         },
       });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 import type { IngredientDetail, MenuItemDetail } from "~/types/domain";
+import { Prisma } from "@prisma/client";
 import { Mountain, Plus, ArrowLeft } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -24,7 +25,7 @@ interface ReplenishTarget {
   currentStock: number;
   lowStockThreshold: number;
   unit: string;
-  costPerUnit?: number | null;
+  costPerUnit?: number | Prisma.Decimal | null;
 }
 
 export default function AdminInventoryPage() {
@@ -52,7 +53,10 @@ export default function AdminInventoryPage() {
               ...ing,
               currentStock: newStock,
               isLowStock: newStock <= ing.lowStockThreshold,
-              costPerUnit: variables.costPerUnit ?? ing.costPerUnit,
+              costPerUnit:
+                variables.costPerUnit !== undefined
+                  ? new Prisma.Decimal(variables.costPerUnit)
+                  : ing.costPerUnit,
             };
           }
           return ing;
@@ -240,7 +244,11 @@ export default function AdminInventoryPage() {
                     onClick={() => {
                       setReplenishTarget(ing);
                       setAddedAmount(ing.unit === "L" ? 2 : 5);
-                      setCostPerUnit(ing.costPerUnit ?? undefined);
+                      setCostPerUnit(
+                        ing.costPerUnit != null
+                          ? Number(ing.costPerUnit)
+                          : undefined,
+                      );
                     }}
                     size="sm"
                     variant="outline"

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { DayOfWeek, type Prisma } from "@prisma/client";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 function parseTimeToMinutes(timeStr: string): number {
@@ -48,7 +48,9 @@ export const staffRouter = createTRPCRouter({
     .input(
       z
         .object({
-          dayOfWeek: z.string().optional(),
+          dayOfWeek: z
+            .union([z.nativeEnum(DayOfWeek), z.literal("ALL")])
+            .optional(),
           station: z.string().optional(),
         })
         .optional(),
@@ -75,7 +77,7 @@ export const staffRouter = createTRPCRouter({
     .input(
       z.object({
         staffId: z.string(),
-        dayOfWeek: z.string(),
+        dayOfWeek: z.nativeEnum(DayOfWeek),
         startTime: z.string(),
         endTime: z.string(),
         station: z.string(),

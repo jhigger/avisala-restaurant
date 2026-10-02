@@ -332,7 +332,7 @@ export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
                 </div>
 
                 <div className="text-foreground font-bold">
-                  ₱{(item.unitPrice * item.quantity).toFixed(2)}
+                  ₱{(Number(item.unitPrice) * item.quantity).toFixed(2)}
                 </div>
               </div>
             ))}
@@ -342,21 +342,21 @@ export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span className="text-foreground font-medium">
-                ₱{order.subtotal.toFixed(2)}
+                ₱{Number(order.subtotal).toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>VAT (12%):</span>
-              <span>₱{order.tax.toFixed(2)}</span>
+              <span>₱{Number(order.tax).toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Delivery Fee:</span>
-              <span>₱{order.deliveryFee.toFixed(2)}</span>
+              <span>₱{Number(order.deliveryFee).toFixed(2)}</span>
             </div>
             <div className="text-foreground border-border flex justify-between border-t pt-2 text-sm font-black">
               <span>Total Paid ({order.paymentMethod}):</span>
               <span className="text-amber-600 dark:text-amber-400">
-                ₱{order.totalAmount.toFixed(2)}
+                ₱{Number(order.totalAmount).toFixed(2)}
               </span>
             </div>
           </div>

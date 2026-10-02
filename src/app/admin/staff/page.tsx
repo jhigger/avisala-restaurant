@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api } from "~/trpc/react";
 import type { StaffMember, ShiftItem } from "~/types/domain";
+import { DayOfWeek } from "@prisma/client";
 import {
   ChefHat,
   Clock,
@@ -36,7 +37,7 @@ export default function AdminStaffPage() {
 
   const [isAddShiftOpen, setIsAddShiftOpen] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState("");
-  const [dayOfWeek, setDayOfWeek] = useState("Monday");
+  const [dayOfWeek, setDayOfWeek] = useState<DayOfWeek>(DayOfWeek.Monday);
   const [startTime, setStartTime] = useState("10:00 AM");
   const [endTime, setEndTime] = useState("06:00 PM");
   const [station, setStation] = useState("Kitchen Hearth");
@@ -104,14 +105,14 @@ export default function AdminStaffPage() {
     },
   });
 
-  const days = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+  const days: DayOfWeek[] = [
+    DayOfWeek.Monday,
+    DayOfWeek.Tuesday,
+    DayOfWeek.Wednesday,
+    DayOfWeek.Thursday,
+    DayOfWeek.Friday,
+    DayOfWeek.Saturday,
+    DayOfWeek.Sunday,
   ];
   const stations = [
     "Kitchen Hearth",
@@ -252,7 +253,7 @@ export default function AdminStaffPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
-          {days.map((day: string) => {
+          {days.map((day: DayOfWeek) => {
             const dayShifts =
               shifts?.filter((s: ShiftItem) => s.dayOfWeek === day) ?? [];
 
@@ -342,7 +343,7 @@ export default function AdminStaffPage() {
                 <Label className="text-xs">Day of Week</Label>
                 <select
                   value={dayOfWeek}
-                  onChange={(e) => setDayOfWeek(e.target.value)}
+                  onChange={(e) => setDayOfWeek(e.target.value as DayOfWeek)}
                   className="bg-card border-border w-full rounded-xl border p-2 text-xs"
                 >
                   {days.map((d: string) => (

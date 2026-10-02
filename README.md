@@ -1,6 +1,6 @@
 # ⚜️ Avisala Restaurant
 
-An Encantadia-themed full-service dining web application built on the **T3 Stack** (Next.js 15 App Router, TypeScript, tRPC v11, Prisma, SQLite, and Tailwind CSS v4) with **shadcn/ui** and optimistic updates.
+An Encantadia-themed full-service dining web application built on the **T3 Stack** (Next.js 15 App Router, TypeScript, tRPC v11, Prisma, Supabase PostgreSQL, and Tailwind CSS v4) with **shadcn/ui** and optimistic updates.
 
 ---
 
@@ -10,6 +10,7 @@ Ensure you have the following installed on your machine:
 - **Node.js**: v18.18+ or v20+
 - **pnpm**: v9+ or v10+ (`npm install -g pnpm`)
 - **Git**
+- A **Supabase** project (PostgreSQL instance with connection pooling enabled)
 
 ---
 
@@ -18,7 +19,7 @@ Ensure you have the following installed on your machine:
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd restaurant-app
+cd avisala-restaurant
 ```
 
 ### 2. Install Dependencies
@@ -40,18 +41,27 @@ Copy-Item .env.example .env
 cp .env.example .env
 ```
 
-Ensure `.env` contains:
+Ensure `.env` contains your Supabase PostgreSQL credentials:
 ```env
-DATABASE_URL="file:./db.sqlite"
+# Connection pooled connection (Supabase Transaction Pooler, port 6543)
+DATABASE_URL="postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require"
+
+# Direct connection for migrations and DDL (Supabase Session Pooler or direct, port 5432)
+DIRECT_URL="postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres?sslmode=require"
+
+# Supabase Web API
+NEXT_PUBLIC_SUPABASE_URL="https://[project-ref].supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+
 NODE_ENV="development"
 ```
 
-### 4. Initialize & Seed the SQLite Database
-Push the Prisma schema to create the local SQLite database and populate it with Encantadian kingdom menus, pantry ingredients, dining tables, and staff rosters:
+### 4. Initialize & Seed the PostgreSQL Database
+Apply Prisma migrations to your Supabase PostgreSQL instance and populate it with Encantadian kingdom menus, pantry ingredients, dining tables, and staff rosters:
 
 ```bash
-# Push schema to create prisma/db.sqlite
-pnpm db:push
+# Apply migrations to live Supabase PostgreSQL
+pnpm db:migrate
 
 # Seed kingdom dishes, tables, staff, and initial orders
 pnpm db:seed
@@ -90,7 +100,8 @@ Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
 | `pnpm dev` | Starts Turbopack development server at `http://localhost:3000` |
 | `pnpm check` | Runs full strict linting (`next lint`) and type check (`tsc --noEmit`) |
 | `pnpm db:studio` | Opens Prisma Studio visual database GUI in browser |
-| `pnpm db:push` | Syncs Prisma schema directly to SQLite database |
+| `pnpm db:migrate` | Deploys pending Prisma migrations to Supabase PostgreSQL |
+| `pnpm db:push` | Pushes Prisma schema state directly to database |
 | `pnpm db:seed` | Re-seeds database with demo data |
 | `pnpm format:write` | Formats all files using Prettier |
 | `pnpm build` | Builds optimized production bundle |

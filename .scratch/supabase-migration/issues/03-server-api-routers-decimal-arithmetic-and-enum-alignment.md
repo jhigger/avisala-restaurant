@@ -10,11 +10,11 @@ Align the server-side tRPC API procedures with the new schema types. Ensure mone
 
 ## Acceptance criteria
 
-- [ ] Order creation procedure computes subtotals, tax rates, delivery fees, and line item costs accurately with decimal data types.
-- [ ] Inventory replenishment procedure correctly updates ingredient stock amounts and unit costs without precision errors.
-- [ ] Menu, reservation, and staff query procedures filter accurately using the new domain enum definitions.
-- [ ] All tRPC input validation schemas align with the generated domain enums.
-- [ ] Codebase passes full TypeScript typechecking and lint checks.
+- [x] Order creation procedure computes subtotals, tax rates, delivery fees, and line item costs accurately with decimal data types.
+- [x] Inventory replenishment procedure correctly updates ingredient stock amounts and unit costs without precision errors.
+- [x] Menu, reservation, and staff query procedures filter accurately using the new domain enum definitions.
+- [x] All tRPC input validation schemas align with the generated domain enums.
+- [x] Codebase passes full TypeScript typechecking and lint checks.
 
 ## Blocked by
 

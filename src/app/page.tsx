@@ -303,7 +303,7 @@ export default function HomePage() {
                     addItem({
                       menuItemId: item.id,
                       name: item.name,
-                      price: item.price,
+                      price: Number(item.price),
                       kingdom: item.kingdom,
                       imageUrl: item.imageUrl,
                       spiceLevel: item.brilyanteSpiceLevel,

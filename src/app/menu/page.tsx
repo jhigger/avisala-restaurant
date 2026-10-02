@@ -122,7 +122,7 @@ function MenuContent() {
       {
         menuItemId: selectedItem.id,
         name: selectedItem.name,
-        price: selectedItem.price,
+        price: Number(selectedItem.price),
         kingdom: selectedItem.kingdom,
         imageUrl: selectedItem.imageUrl,
         spiceLevel: spiceChoice,
@@ -375,7 +375,7 @@ function MenuContent() {
                       addItem({
                         menuItemId: item.id,
                         name: item.name,
-                        price: item.price,
+                        price: Number(item.price),
                         kingdom: item.kingdom,
                         imageUrl: item.imageUrl,
                         spiceLevel: item.brilyanteSpiceLevel,
@@ -520,7 +520,7 @@ function MenuContent() {
                   <ShoppingBag className="h-4 w-4" />
                   <span>
                     Add to Bag • ₱
-                    {(selectedItem.price * itemQuantity).toFixed(2)}
+                    {(Number(selectedItem.price) * itemQuantity).toFixed(2)}
                   </span>
                 </Button>
               </div>

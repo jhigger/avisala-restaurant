@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { Kingdom, Category, type Prisma } from "@prisma/client";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const menuRouter = createTRPCRouter({
@@ -7,8 +7,12 @@ export const menuRouter = createTRPCRouter({
     .input(
       z
         .object({
-          kingdom: z.string().optional(),
-          category: z.string().optional(),
+          kingdom: z
+            .union([z.nativeEnum(Kingdom), z.literal("ALL")])
+            .optional(),
+          category: z
+            .union([z.nativeEnum(Category), z.literal("ALL")])
+            .optional(),
           onlyAvailable: z.boolean().optional(),
         })
         .optional(),
