@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { OrderTrackingSkeleton } from "~/components/skeletons/order-tracking-skeleton";
 
 interface OrderTrackingPageProps {
   params: Promise<{ id: string }>;
@@ -26,22 +27,28 @@ interface OrderTrackingPageProps {
 export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
   const { id } = use(params);
 
-  // Poll order status every 3 seconds for live kitchen updates
+  // Poll order status every 3 seconds for active kitchen updates; halt on error or completion
   const {
     data: order,
     isLoading,
     error,
-  } = api.order.getById.useQuery({ id }, { refetchInterval: 3000 });
+  } = api.order.getById.useQuery(
+    { id },
+    {
+      refetchInterval: (query) => {
+        // Stop polling immediately if query failed (e.g. Order not found)
+        if (query.state.error) return false;
+        // Stop polling if order has reached final delivery or cancellation
+        const status = query.state.data?.status;
+        if (status === "FULFILLED" || status === "CANCELLED") return false;
+        return 3000;
+      },
+      retry: false,
+    },
+  );
 
   if (isLoading) {
-    return (
-      <div className="space-y-3 py-24 text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
-        <p className="text-muted-foreground text-xs">
-          Connecting to Royal Order Dispatch...
-        </p>
-      </div>
-    );
+    return <OrderTrackingSkeleton />;
   }
 
   if (error || !order) {

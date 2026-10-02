@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Prisma, OrderStatus, OrderType, PaymentMethod } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 export const orderItemInputSchema = z.object({
@@ -186,7 +187,10 @@ export const orderRouter = createTRPCRouter({
       });
 
       if (!order) {
-        throw new Error("Order not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
       }
 
       return order;

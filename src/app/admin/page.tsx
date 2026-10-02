@@ -12,13 +12,26 @@ import type {
 import { Flame, CalendarCheck, ChefHat, AlertTriangle } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { AdminDashboardSkeleton } from "~/components/skeletons/admin-dashboard-skeleton";
 
 export default function AdminDashboardPage() {
-  const { data: orders } = api.order.getAll.useQuery();
-  const { data: tables } = api.reserve.getTables.useQuery();
-  const { data: reservations } = api.reserve.getReservations.useQuery();
+  const { data: orders, isLoading: ordersLoading } =
+    api.order.getAll.useQuery();
+  const { data: tables, isLoading: tablesLoading } =
+    api.reserve.getTables.useQuery();
+  const { data: reservations, isLoading: reservationsLoading } =
+    api.reserve.getReservations.useQuery();
   const { data: ingredients } = api.inventory.getAll.useQuery();
   const { data: staff } = api.staff.getAll.useQuery();
+
+  const isInitialLoading =
+    (!orders && ordersLoading) ||
+    (!tables && tablesLoading) ||
+    (!reservations && reservationsLoading);
+
+  if (isInitialLoading) {
+    return <AdminDashboardSkeleton />;
+  }
 
   // Metrics computation
   const activeOrders =

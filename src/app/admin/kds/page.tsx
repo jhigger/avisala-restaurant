@@ -15,12 +15,13 @@ import {
 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { KDSSkeleton } from "~/components/skeletons/kds-skeleton";
 
 export default function KDSPage() {
   const utils = api.useUtils();
 
   // Poll orders every 3 seconds
-  const { data: orders } = api.order.getAll.useQuery(undefined, {
+  const { data: orders, isLoading } = api.order.getAll.useQuery(undefined, {
     refetchInterval: 3000,
   });
 
@@ -85,6 +86,10 @@ export default function KDSPage() {
 
     updateStatusMutation.mutate({ orderId, status: nextStatus });
   };
+
+  if (isLoading && !orders) {
+    return <KDSSkeleton />;
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">

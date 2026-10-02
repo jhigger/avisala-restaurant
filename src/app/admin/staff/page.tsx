@@ -28,12 +28,15 @@ import {
   DialogTitle,
   DialogDescription,
 } from "~/components/ui/dialog";
+import { AdminStaffSkeleton } from "~/components/skeletons/admin-staff-skeleton";
 
 export default function AdminStaffPage() {
   const utils = api.useUtils();
 
-  const { data: staffList } = api.staff.getAll.useQuery();
-  const { data: shifts } = api.staff.getShifts.useQuery();
+  const { data: staffList, isLoading: staffLoading } =
+    api.staff.getAll.useQuery();
+  const { data: shifts, isLoading: shiftsLoading } =
+    api.staff.getShifts.useQuery();
 
   const [isAddShiftOpen, setIsAddShiftOpen] = useState(false);
   const [selectedStaffId, setSelectedStaffId] = useState("");
@@ -148,6 +151,10 @@ export default function AdminStaffPage() {
         return null;
     }
   };
+
+  if ((!staffList && staffLoading) || (!shifts && shiftsLoading)) {
+    return <AdminStaffSkeleton />;
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">

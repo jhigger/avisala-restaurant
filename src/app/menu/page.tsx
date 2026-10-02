@@ -28,23 +28,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "~/components/ui/dialog";
+import { MenuItemSkeletonGrid } from "~/components/skeletons/menu-item-skeleton";
+import MenuLoading from "./loading";
 
 export const dynamic = "force-dynamic";
 
 export default function MenuPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="text-muted-foreground flex min-h-screen items-center justify-center py-16">
-          <div className="flex flex-col items-center gap-2">
-            <Utensils className="h-8 w-8 animate-spin text-amber-500" />
-            <p className="text-foreground font-semibold">
-              Loading Encantadia Realm Menu...
-            </p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<MenuLoading />}>
       <MenuContent />
     </Suspense>
   );
@@ -266,12 +257,7 @@ function MenuContent() {
 
       {/* DISHES GRID */}
       {isLoading ? (
-        <div className="space-y-3 py-20 text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
-          <p className="text-muted-foreground text-xs">
-            Summoning menu items from the ancient scrolls...
-          </p>
-        </div>
+        <MenuItemSkeletonGrid count={8} />
       ) : filteredItems.length === 0 ? (
         <div className="border-border space-y-2 rounded-2xl border border-dashed p-8 py-16 text-center">
           <Utensils className="text-muted-foreground mx-auto h-10 w-10 opacity-40" />

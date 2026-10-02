@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "~/components/ui/dialog";
+import { AdminInventorySkeleton } from "~/components/skeletons/admin-inventory-skeleton";
 
 interface ReplenishTarget {
   id: string;
@@ -31,8 +32,10 @@ interface ReplenishTarget {
 export default function AdminInventoryPage() {
   const utils = api.useUtils();
 
-  const { data: ingredients } = api.inventory.getAll.useQuery();
-  const { data: menuItems } = api.menu.getAll.useQuery();
+  const { data: ingredients, isLoading: ingredientsLoading } =
+    api.inventory.getAll.useQuery();
+  const { data: menuItems, isLoading: menuLoading } =
+    api.menu.getAll.useQuery();
 
   const [replenishTarget, setReplenishTarget] =
     useState<ReplenishTarget | null>(null);
@@ -115,6 +118,10 @@ export default function AdminInventoryPage() {
       costPerUnit: costPerUnit && costPerUnit > 0 ? costPerUnit : undefined,
     });
   };
+
+  if ((!ingredients && ingredientsLoading) || (!menuItems && menuLoading)) {
+    return <AdminInventorySkeleton />;
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">

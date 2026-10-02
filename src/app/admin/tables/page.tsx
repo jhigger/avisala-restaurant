@@ -7,13 +7,16 @@ import type { DiningTableDetail, ReservationDetail } from "~/types/domain";
 import { CalendarCheck, Users, ArrowLeft, UserCheck } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { AdminTablesSkeleton } from "~/components/skeletons/admin-tables-skeleton";
 
 export default function AdminTablesPage() {
   const utils = api.useUtils();
   const [selectedRealmFilter, setSelectedRealmFilter] = useState("ALL");
 
-  const { data: tables } = api.reserve.getTables.useQuery();
-  const { data: reservations } = api.reserve.getReservations.useQuery();
+  const { data: tables, isLoading: tablesLoading } =
+    api.reserve.getTables.useQuery();
+  const { data: reservations, isLoading: reservationsLoading } =
+    api.reserve.getReservations.useQuery();
 
   const updateTableStatusMutation = api.reserve.updateTableStatus.useMutation({
     async onMutate(variables) {
@@ -122,6 +125,10 @@ export default function AdminTablesPage() {
       status: "COMPLETED",
     });
   };
+
+  if ((!tables && tablesLoading) || (!reservations && reservationsLoading)) {
+    return <AdminTablesSkeleton />;
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
