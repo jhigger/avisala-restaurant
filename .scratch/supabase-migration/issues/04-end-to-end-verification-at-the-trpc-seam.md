@@ -10,12 +10,12 @@ Verify end-to-end behavior at the primary testing seam (`appRouter.createCaller`
 
 ## Acceptance criteria
 
-- [ ] Integration test suite executes against the live Supabase PostgreSQL instance via the tRPC caller seam.
-- [ ] Test verifies querying menu items filtered by kingdom and category.
-- [ ] Test verifies order creation computes exact line item totals, tax, and delivery fee without floating-point errors.
-- [ ] Test verifies inventory stock deduction occurs when an order is placed.
-- [ ] Test verifies table booking succeeds with valid realm preference and assigns confirmed status.
-- [ ] All tests pass cleanly in automated test runs.
+- [x] Integration test suite executes against the live Supabase PostgreSQL instance via the tRPC caller seam.
+- [x] Test verifies querying menu items filtered by kingdom and category.
+- [x] Test verifies order creation computes exact line item totals, tax, and delivery fee without floating-point errors.
+- [x] Test verifies inventory stock deduction occurs when an order is placed.
+- [x] Test verifies table booking succeeds with valid realm preference and assigns confirmed status.
+- [x] All tests pass cleanly in automated test runs.
 
 ## Blocked by
 

@@ -78,7 +78,9 @@ export const orderRouter = createTRPCRouter({
       }
 
       const tax = subtotal.mul(0.12).toDecimalPlaces(2);
-      const deliveryFee = new Prisma.Decimal(input.orderType === "DELIVERY" ? 120 : 0);
+      const deliveryFee = new Prisma.Decimal(
+        input.orderType === "DELIVERY" ? 120 : 0,
+      );
       const totalAmount = subtotal.add(tax).add(deliveryFee);
 
       // 4. Generate Order Number
