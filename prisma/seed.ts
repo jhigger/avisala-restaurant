@@ -1,4 +1,10 @@
-import { PrismaClient, type Ingredient } from "@prisma/client";
+import {
+  PrismaClient,
+  type Ingredient,
+  type Kingdom,
+  type Category,
+  type DayOfWeek,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -163,7 +169,18 @@ async function main() {
   );
 
   console.log("Seeding elemental menu items...");
-  const menuItems = [
+  const menuItems: Array<{
+    name: string;
+    description: string;
+    price: number;
+    kingdom: Kingdom;
+    category: Category;
+    brilyanteSpiceLevel: number;
+    imageUrl: string;
+    isChefSpecial: boolean;
+    dietary: string;
+    ingredients: Array<{ name: string; qty: number }>;
+  }> = [
     // LIREO (Air)
     {
       name: "Amihan's Ethereal Cloud Soup",
@@ -699,7 +716,7 @@ async function main() {
   ]);
 
   // Seed weekly shifts
-  const days = [
+  const days: DayOfWeek[] = [
     "Monday",
     "Tuesday",
     "Wednesday",
