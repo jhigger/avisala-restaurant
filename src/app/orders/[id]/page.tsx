@@ -19,6 +19,7 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { OrderTrackingSkeleton } from "~/components/skeletons/order-tracking-skeleton";
+import { useOrderRealtime } from "~/hooks/use-order-realtime";
 
 interface OrderTrackingPageProps {
   params: Promise<{ id: string }>;
@@ -27,7 +28,9 @@ interface OrderTrackingPageProps {
 export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
   const { id } = use(params);
 
-  // Poll order status every 3 seconds for active kitchen updates; halt on error or completion
+  // Subscribe to real-time order status updates via Supabase Realtime
+  const { isLive } = useOrderRealtime(id);
+
   const {
     data: order,
     isLoading,
@@ -35,14 +38,6 @@ export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
   } = api.order.getById.useQuery(
     { id },
     {
-      refetchInterval: (query) => {
-        // Stop polling immediately if query failed (e.g. Order not found)
-        if (query.state.error) return false;
-        // Stop polling if order has reached final delivery or cancellation
-        const status = query.state.data?.status;
-        if (status === "FULFILLED" || status === "CANCELLED") return false;
-        return 3000;
-      },
       retry: false,
     },
   );
@@ -129,10 +124,15 @@ export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
             <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
               Royal Order Tracking
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
-              <span className="h-1.5 w-1.5 animate-ping rounded-full bg-emerald-500" />
-              Live Kitchen Sync
-            </span>
+            {isLive && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                </span>
+                Live Updates
+              </span>
+            )}
           </div>
           <h1 className="text-foreground text-2xl font-black tracking-tight sm:text-3xl">
             Order #{order.orderNumber}
@@ -183,7 +183,7 @@ export default function OrderTrackingPage({ params }: OrderTrackingPageProps) {
             <span>Estimated Wait: {order.estimatedMinutes} mins</span>
           </span>
           <span className="text-muted-foreground">
-            Auto-refreshes every 3 seconds
+            {isLive ? "Realtime sync active" : "Connecting to kitchen..."}
           </span>
         </div>
 
