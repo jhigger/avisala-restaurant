@@ -19,6 +19,9 @@ const config = {
       },
     ],
   },
+  turbopack: {
+    root: __dirname,
+  },
   webpack: (config, { webpack }) => {
     config.plugins.push(
       new webpack.IgnorePlugin({
