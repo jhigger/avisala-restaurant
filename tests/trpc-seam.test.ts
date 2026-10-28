@@ -18,12 +18,35 @@ describe("tRPC Seam Integration Tests (Live Supabase PostgreSQL)", () => {
   const createdOrderIds: string[] = [];
   const createdReservationIds: string[] = [];
 
+  let isDbConnected = false;
+
+  const skipIfDbOffline = (t: { skip: (msg?: string) => void }) => {
+    if (!isDbConnected) {
+      t.skip("Live Supabase PostgreSQL is unreachable");
+      return true;
+    }
+    return false;
+  };
+
   before(async () => {
-    const ctx = await createTRPCContext({ headers: new Headers() });
-    caller = createCaller(ctx);
+    try {
+      await db.$queryRaw`SELECT 1`;
+      isDbConnected = true;
+      const ctx = await createTRPCContext({ headers: new Headers() });
+      caller = createCaller(ctx);
+    } catch {
+      console.warn(
+        "\n[WARN] Live Supabase PostgreSQL is unreachable. Skipping live integration tests.\n",
+      );
+    }
   });
 
   after(async () => {
+    if (!isDbConnected) {
+      await db.$disconnect().catch(() => undefined);
+      return;
+    }
+
     // Hermetic cleanup: delete test-created orders and reservations
     if (createdOrderIds.length > 0) {
       await db.orderItem.deleteMany({
@@ -43,7 +66,8 @@ describe("tRPC Seam Integration Tests (Live Supabase PostgreSQL)", () => {
     await db.$disconnect();
   });
 
-  test("1. Menu query filters accurately by kingdom and category", async () => {
+  test("1. Menu query filters accurately by kingdom and category", async (t) => {
+    if (skipIfDbOffline(t)) return;
     const lireoMains = await caller.menu.getAll({
       kingdom: Kingdom.LIREO,
       category: Category.Mains,
@@ -68,7 +92,8 @@ describe("tRPC Seam Integration Tests (Live Supabase PostgreSQL)", () => {
     }
   });
 
-  test("2. Order creation computes exact line item totals, tax, and delivery fee with Decimal arithmetic", async () => {
+  test("2. Order creation computes exact line item totals, tax, and delivery fee with Decimal arithmetic", async (t) => {
+    if (skipIfDbOffline(t)) return;
     const availableItems = await caller.menu.getAll({
       kingdom: Kingdom.LIREO,
     });
@@ -171,7 +196,8 @@ describe("tRPC Seam Integration Tests (Live Supabase PostgreSQL)", () => {
     assert.ok(orderLine2.unitPrice.equals(item2.price));
   });
 
-  test("3. Inventory stock deduction occurs accurately upon order placement", async () => {
+  test("3. Inventory stock deduction occurs accurately upon order placement", async (t) => {
+    if (skipIfDbOffline(t)) return;
     // Pick an item with recipes
     const menuItems = await caller.menu.getAll({ kingdom: Kingdom.HATHORIA });
     const item = menuItems.find((i) => i.isAvailable && i.recipe.length > 0);
@@ -225,7 +251,8 @@ describe("tRPC Seam Integration Tests (Live Supabase PostgreSQL)", () => {
     });
   });
 
-  test("4. Table booking succeeds with valid realm preference and assigns confirmed status", async () => {
+  test("4. Table reservation succeeds with valid realm preference and assigns confirmed status", async (t) => {
+    if (skipIfDbOffline(t)) return;
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + 7);
     const dateStr = futureDate.toISOString().split("T")[0]!;
