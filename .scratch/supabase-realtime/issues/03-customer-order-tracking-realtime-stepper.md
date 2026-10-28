@@ -10,10 +10,10 @@ Update the customer order tracking page (`src/app/orders/[id]/page.tsx`) to remo
 
 ## Acceptance criteria
 
-- [ ] `refetchInterval` is completely removed from `api.order.getById.useQuery` in `src/app/orders/[id]/page.tsx`.
-- [ ] `useOrderRealtime(id)` is hooked into the component lifecycle.
-- [ ] A subtle "Live Updates" badge with an active green indicator dot is rendered in the header when connected.
-- [ ] Component renders cleanly and passes type checking and linting.
+- [x] `refetchInterval` is completely removed from `api.order.getById.useQuery` in `src/app/orders/[id]/page.tsx`.
+- [x] `useOrderRealtime(id)` is hooked into the component lifecycle.
+- [x] A subtle "Live Updates" badge with an active green indicator dot is rendered in the header when connected.
+- [x] Component renders cleanly and passes type checking and linting.
 
 ## Blocked by
 

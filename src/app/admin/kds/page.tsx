@@ -16,14 +16,15 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { KDSSkeleton } from "~/components/skeletons/kds-skeleton";
+import { useKDSOrdersRealtime } from "~/hooks/use-order-realtime";
 
 export default function KDSPage() {
   const utils = api.useUtils();
 
-  // Poll orders every 3 seconds
-  const { data: orders, isLoading } = api.order.getAll.useQuery(undefined, {
-    refetchInterval: 3000,
-  });
+  // Subscribe to real-time order updates via Supabase Realtime
+  const { isLive } = useKDSOrdersRealtime();
+
+  const { data: orders, isLoading } = api.order.getAll.useQuery();
 
   const updateStatusMutation = api.order.updateStatus.useMutation({
     async onMutate(variables) {
@@ -51,9 +52,11 @@ export default function KDSPage() {
     },
   });
 
+  const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(Date.now()), 10000);
+    setMounted(true);
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -120,10 +123,32 @@ export default function KDSPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-muted-foreground flex items-center gap-1 text-xs">
-            <RefreshCw className="h-3.5 w-3.5 animate-spin text-amber-500" />
-            Live Synced (3s)
+          <span className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+            <Clock className="h-3.5 w-3.5" />
+            <span>
+              {mounted
+                ? new Date(currentTime).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })
+                : "--:--:--"}
+            </span>
           </span>
+          {isLive ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
+              Live Feed
+            </span>
+          ) : (
+            <span className="text-muted-foreground flex items-center gap-1 text-xs">
+              <RefreshCw className="h-3.5 w-3.5 animate-spin text-amber-500" />
+              Connecting...
+            </span>
+          )}
         </div>
       </div>
 

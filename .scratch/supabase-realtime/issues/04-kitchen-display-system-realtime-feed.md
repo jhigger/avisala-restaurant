@@ -10,11 +10,11 @@ Update the Kitchen Display System page (`src/app/admin/kds/page.tsx`) to remove 
 
 ## Acceptance criteria
 
-- [ ] `refetchInterval: 3000` is removed from `api.order.getAll.useQuery` in `src/app/admin/kds/page.tsx`.
-- [ ] `useKDSOrdersRealtime()` is hooked into the component lifecycle.
-- [ ] A subtle "Live Feed" badge with an active green indicator dot is rendered in the header next to the clock.
-- [ ] Existing optimistic status mutations continue working smoothly with real-time invalidation.
-- [ ] Passes type checking and linting.
+- [x] `refetchInterval: 3000` is removed from `api.order.getAll.useQuery` in `src/app/admin/kds/page.tsx`.
+- [x] `useKDSOrdersRealtime()` is hooked into the component lifecycle.
+- [x] A subtle "Live Feed" badge with an active green indicator dot is rendered in the header next to the clock.
+- [x] Existing optimistic status mutations continue working smoothly with real-time invalidation.
+- [x] Passes type checking and linting.
 
 ## Blocked by
 
